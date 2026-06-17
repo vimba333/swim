@@ -15,7 +15,9 @@ class UsersLoading extends UsersState {
 
 class UsersLoaded extends UsersState {
   final List<UserPreview> users;
-  const UsersLoaded(this.users);
+  final List<UserPreview> filtered;
+
+  const UsersLoaded({required this.users, required this.filtered});
 }
 
 class UsersError extends UsersState {
