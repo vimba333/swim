@@ -1,4 +1,3 @@
-
 import 'package:swim/features/users/domain/entities/user.dart';
 
 sealed class UserDetailState {
@@ -20,5 +19,7 @@ class UserDetailLoaded extends UserDetailState {
 
 class UserDetailError extends UserDetailState {
   final String message;
-  const UserDetailError(this.message);
+  final bool isNetwork;
+
+  const UserDetailError(this.message, {this.isNetwork = false});
 }

@@ -22,5 +22,7 @@ class UsersLoaded extends UsersState {
 
 class UsersError extends UsersState {
   final String message;
-  const UsersError(this.message);
+  final bool isNetwork;
+
+  const UsersError(this.message, {this.isNetwork = false});
 }

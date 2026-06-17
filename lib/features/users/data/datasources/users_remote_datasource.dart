@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:swim/features/users/data/models/user_preview_model.dart';
+import 'package:swim/core/error/app_exception.dart';
 import 'package:swim/features/users/data/models/user_model.dart';
+import 'package:swim/features/users/data/models/user_preview_model.dart';
 
 abstract interface class UsersRemoteDatasource {
   Future<List<UserPreviewModel>> getUsers();
@@ -15,28 +18,40 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
 
   @override
   Future<List<UserPreviewModel>> getUsers() async {
-    final response = await client.get(
-      Uri.parse('https://jsonplaceholder.typicode.com/users'),
-    );
+    try {
+      final response = await client
+          .get(Uri.parse('https://jsonplaceholder.typicode.com/users'))
+          .timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> json = jsonDecode(response.body);
-      return json.map((e) => UserPreviewModel.fromJson(e)).toList();
+      if (response.statusCode == 200) {
+        final List<dynamic> json = jsonDecode(response.body);
+        return json.map((e) => UserPreviewModel.fromJson(e)).toList();
+      }
+
+      throw ServerException(response.statusCode);
+    } on SocketException {
+      throw const NetworkException();
+    } on TimeoutException {
+      throw const RequestTimeoutException();
     }
-
-    throw Exception('Failed to load users: ${response.statusCode}');
   }
 
   @override
   Future<UserModel> getUserById(int id) async {
-    final response = await client.get(
-      Uri.parse('https://jsonplaceholder.typicode.com/users/$id'),
-    );
+    try {
+      final response = await client
+          .get(Uri.parse('https://jsonplaceholder.typicode.com/users/$id'))
+          .timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      return UserModel.fromJson(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        return UserModel.fromJson(jsonDecode(response.body));
+      }
+
+      throw ServerException(response.statusCode);
+    } on SocketException {
+      throw const NetworkException();
+    } on TimeoutException {
+      throw const RequestTimeoutException();
     }
-
-    throw Exception('Failed to load user: ${response.statusCode}');
   }
 }

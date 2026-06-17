@@ -7,24 +7,15 @@ import 'package:swim/features/users/presentation/pages/users_page.dart';
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
+    GoRoute(path: '/', builder: (context, state) => const HomePage()),
+    GoRoute(path: '/surveys', builder: (context, state) => const SurveyPage()),
+    GoRoute(path: '/users', builder: (context, state) => const UsersPage()),
     GoRoute(
-      path: '/',
-      builder: (context, state) => const HomePage(),
+      path: '/users/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return UserDetailPage(userId: id);
+      },
     ),
-    GoRoute(
-      path: '/surveys',
-      builder: (context, state) => const SurveyPage(),
-    ),
-   GoRoute(
-  path: '/users',
-  builder: (context, state) => const UsersPage(),
-),
-GoRoute(
-  path: '/users/:id',
-  builder: (context, state) {
-    final id = int.parse(state.pathParameters['id']!);
-    return UserDetailPage(userId: id);
-  },
-),
   ],
 );

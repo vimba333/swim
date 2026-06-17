@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swim/core/error/app_exception.dart';
 import 'package:swim/features/users/domain/use_cases/get_users_usecase.dart';
 import 'package:swim/features/users/presentation/cubit/users_state.dart';
 
@@ -12,8 +13,12 @@ class UsersCubit extends Cubit<UsersState> {
       emit(const UsersLoading());
       final users = await _getUsersUsecase();
       emit(UsersLoaded(users: users, filtered: users));
+    } on NetworkException catch (e) {
+      emit(UsersError(e.message, isNetwork: true));
+    } on AppException catch (e) {
+      emit(UsersError(e.message));
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(const UsersError('An unexpected error occurred'));
     }
   }
 
@@ -26,6 +31,7 @@ class UsersCubit extends Cubit<UsersState> {
       return;
     }
 
+    /// TODO: Implement search functionality
     final filtered = state.users.where((u) {
       return u.name.toLowerCase().contains(query.toLowerCase()) ||
           u.email.toLowerCase().contains(query.toLowerCase());
