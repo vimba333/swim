@@ -26,7 +26,7 @@ class UserDetailPage extends StatelessWidget {
         ),
       )..getUser(userId),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Пользователь')),
+        appBar: AppBar(title: const Text('User Detail')),
         body: BlocBuilder<UserDetailCubit, UserDetailState>(
           builder: (context, state) {
             return switch (state) {
@@ -66,23 +66,23 @@ class _UserDetailView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _Section(title: 'Основное', items: [
-            _Item(icon: Icons.person, label: 'Имя', value: user.name),
+          _Section(title: 'Main', items: [
+            _Item(icon: Icons.person, label: 'Name', value: user.name),
             _Item(icon: Icons.alternate_email, label: 'Username', value: '@${user.username}'),
             _Item(icon: Icons.email, label: 'Email', value: user.email),
-            _Item(icon: Icons.phone, label: 'Телефон', value: user.phone),
-            _Item(icon: Icons.language, label: 'Сайт', value: user.website),
+            _Item(icon: Icons.phone, label: 'Phone', value: user.phone),
+            _Item(icon: Icons.language, label: 'Website', value: user.website),
           ]),
           const SizedBox(height: 16),
-          _Section(title: 'Адрес', items: [
-            _Item(icon: Icons.location_on, label: 'Город', value: user.address.city),
-            _Item(icon: Icons.map, label: 'Улица', value: '${user.address.street}, ${user.address.suite}'),
-            _Item(icon: Icons.markunread_mailbox, label: 'Индекс', value: user.address.zipcode),
+          _Section(title: 'Address', items: [
+            _Item(icon: Icons.location_on, label: 'City', value: user.address.city),
+            _Item(icon: Icons.map, label: 'Street', value: '${user.address.street}, ${user.address.suite}'),
+            _Item(icon: Icons.markunread_mailbox, label: 'Zip Code', value: user.address.zipcode),
           ]),
           const SizedBox(height: 16),
-          _Section(title: 'Компания', items: [
-            _Item(icon: Icons.business, label: 'Название', value: user.company.name),
-            _Item(icon: Icons.format_quote, label: 'Девиз', value: user.company.catchPhrase),
+          _Section(title: 'Company', items: [
+            _Item(icon: Icons.business, label: 'Name', value: user.company.name),
+            _Item(icon: Icons.format_quote, label: 'Catch Phrase', value: user.company.catchPhrase),
           ]),
         ],
       ),

@@ -69,7 +69,7 @@ class _UsersViewState extends State<_UsersView> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Поиск по имени или email...',
+                hintText: 'Search by name or email...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -97,7 +97,7 @@ class _UsersViewState extends State<_UsersView> {
                   ),
                   UsersLoaded(:final filtered) =>
                     filtered.isEmpty
-                        ? const Center(child: Text('Ничего не найдено'))
+                        ? const Center(child: Text('Nothing found'))
                         : ListView.builder(
                             itemCount: filtered.length,
                             itemBuilder: (context, index) => InkWell(
