@@ -44,17 +44,24 @@ class _UsersViewState extends State<_UsersView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0A1628),
       appBar: AppBar(
-        title: const Text('Users'),
+        backgroundColor: const Color(0xFF0A1628),
+        elevation: 0,
         leading: IconButton(
           onPressed: () => context.go('/'),
-          icon: const Icon(Icons.arrow_back),
-          tooltip: 'Back to the home page',
+          icon: const Icon(Icons.chevron_left, color: Colors.white),
         ),
-
+        title: const Text(
+          'Users',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white54),
             onPressed: () {
               _searchController.clear();
               context.read<UsersCubit>().getUsers();
@@ -65,26 +72,34 @@ class _UsersViewState extends State<_UsersView> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search by name or email...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(color: Colors.white38),
+                prefixIcon: const Icon(Icons.search, color: Colors.white38),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: Colors.white38),
                         onPressed: () {
                           _searchController.clear();
                           context.read<UsersCubit>().search('');
                         },
                       )
                     : null,
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.06),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              onChanged: context.read<UsersCubit>().search,
+              onChanged: (val) {
+                setState(() {});
+                context.read<UsersCubit>().search(val);
+              },
             ),
           ),
           Expanded(
@@ -93,25 +108,84 @@ class _UsersViewState extends State<_UsersView> {
                 return switch (state) {
                   UsersInitial() => const SizedBox.shrink(),
                   UsersLoading() => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  UsersLoaded(:final filtered) =>
-                    filtered.isEmpty
-                        ? const Center(child: Text('Nothing found'))
-                        : ListView.builder(
-                            itemCount: filtered.length,
-                            itemBuilder: (context, index) => InkWell(
-                              onTap: () =>
-                                  context.push('/users/${filtered[index].id}'),
-                              child: UserCard(user: filtered[index]),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF00E096),
+                      ),
+                    ),
+                  UsersLoaded(:final filtered) => filtered.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nothing found',
+                            style: TextStyle(color: Colors.white38),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) => _UserCardWrapper(
+                            onTap: () =>
+                                context.push('/users/${filtered[index].id}'),
+                            child: UserCard(user: filtered[index]),
+                          ),
+                        ),
+                  UsersError(:final message) => Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.white38,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            message,
+                            style: const TextStyle(color: Colors.white38),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () =>
+                                context.read<UsersCubit>().getUsers(),
+                            child: const Text(
+                              'Try again',
+                              style: TextStyle(color: Color(0xFF00E096)),
                             ),
                           ),
-                  UsersError(:final message) => Center(child: Text(message)),
+                        ],
+                      ),
+                    ),
                 };
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _UserCardWrapper extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _UserCardWrapper({required this.child, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: child,
+        ),
       ),
     );
   }

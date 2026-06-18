@@ -25,11 +25,17 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
   late TextEditingController _secController;
   bool _editingMin = false;
   bool _editingSec = false;
-
   late FocusNode _minFocusNode;
   late FocusNode _secFocusNode;
 
-  static const _ticks = [70, 90, 120, 180, 240];
+  static const _levels = [
+    SwimmerType.elite,
+    SwimmerType.advanced,
+    SwimmerType.intermediate,
+    SwimmerType.beginner,
+  ];
+
+  static const _sliderTicks = ['1:10', '1:30', '2:00'];
 
   @override
   void initState() {
@@ -64,7 +70,7 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
     super.dispose();
   }
 
-  String get _fmtMin => (_seconds ~/ 60).toString().padLeft(2, '0');
+  String get _fmtMin => (_seconds ~/ 60).toString();
   String get _fmtSec => (_seconds.round() % 60).toString().padLeft(2, '0');
 
   void _updateSeconds(double val) {
@@ -90,19 +96,20 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
     setState(() => _editingSec = false);
   }
 
-  String _tickLabel(int s) {
-    final m = s ~/ 60;
-    final sec = s % 60;
-    return '$m:${sec.toString().padLeft(2, '0')}';
-  }
-
   Color _accentColor(SwimmerType? level) => switch (level) {
-    SwimmerType.elite => const Color(0xFFFFD700),
-    SwimmerType.advanced => const Color(0xFF00C8FF),
-    SwimmerType.intermediate => const Color(0xFF00E096),
-    SwimmerType.beginner => const Color(0xFFAAAAAA),
-    null => const Color(0xFF444444),
-  };
+        SwimmerType.elite => const Color(0xFFFFD700),
+        SwimmerType.advanced => const Color(0xFF4DA6FF),
+        SwimmerType.intermediate => const Color(0xFF00E096),
+        SwimmerType.beginner => const Color(0xFFAAAAAA),
+        null => const Color(0xFF4DA6FF),
+      };
+
+  String _levelLabel(SwimmerType type) => switch (type) {
+        SwimmerType.elite => 'Elite',
+        SwimmerType.advanced => 'Advanced',
+        SwimmerType.intermediate => 'Intermediate',
+        SwimmerType.beginner => 'Beginner',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +117,19 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
     final accent = _accentColor(level);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // YOUR PACE
+        const Text(
+          'YOUR PACE',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.white38,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 16),
+
         // MIN : SEC
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -120,36 +138,92 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
             _TimeUnit(
               controller: _minController,
               focusNode: _minFocusNode,
-              label: 'MIN',
               onIncrement: () => _updateSeconds(_seconds + 60),
               onDecrement: () => _updateSeconds(_seconds - 60),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                ':',
-                style: TextStyle(
-                  fontSize: 64,
-                  fontWeight: FontWeight.w200,
-                  color: Colors.white54,
-                ),
+            // Двоеточие с квадратиками
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    color: accent,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    color: accent,
+                  ),
+                ],
               ),
             ),
             _TimeUnit(
               controller: _secController,
               focusNode: _secFocusNode,
-              label: 'SEC',
               onIncrement: () => _updateSeconds(_seconds + 1),
               onDecrement: () => _updateSeconds(_seconds - 1),
               maxValue: 59,
             ),
           ],
         ),
-        const SizedBox(height: 16),
 
-        // Badge
-        SwimmerLevelBadge(level: level),
+        // MIN : SEC / 100M
+        const SizedBox(height: 8),
+        const Text(
+          'MIN  :  SEC  /  100M',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.white38,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // THAT PUTS YOU AT
+        const Text(
+          'THAT PUTS YOU AT',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.white38,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Text(
+            key: ValueKey(level),
+            level != null ? _levelLabel(level) : '—',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: accent,
+            ),
+          ),
+        ),
         const SizedBox(height: 24),
+
+        // Уровни над слайдером
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: _levels.map((l) {
+            final isActive = l == level;
+            return Text(
+              _levelLabel(l),
+              style: TextStyle(
+                fontSize: 11,
+                color: isActive ? Colors.white : Colors.white38,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w400,
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 4),
 
         // Слайдер
         SliderTheme(
@@ -158,8 +232,8 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
             inactiveTrackColor: Colors.white12,
             thumbColor: accent,
             overlayColor: accent.withOpacity(0.15),
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
           ),
           child: Slider(
             value: _seconds.clamp(
@@ -176,44 +250,37 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
           ),
         ),
 
+        // Метки слайдера
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _ticks
-                .map(
-                  (t) => Text(
-                    _tickLabel(t),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.white38,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                )
+            children: _sliderTicks
+                .map((t) => Text(
+                      t,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white38,
+                      ),
+                    ))
                 .toList(),
           ),
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 40),
 
         // Continue
-        SizedBox(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
+          height: 56,
+          decoration: BoxDecoration(
+            color: widget.isLoading ? accent.withOpacity(0.5) : accent,
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: TextButton(
             onPressed: widget.isLoading
                 ? null
                 : () => widget.onSubmit(SwimmerLevel(seconds: _seconds)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: accent,
-              foregroundColor: accent == const Color(0xFFAAAAAA)
-                  ? Colors.black
-                  : Colors.black,
-
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
             child: widget.isLoading
                 ? const SizedBox(
                     width: 20,
@@ -223,41 +290,20 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
                       color: Colors.black,
                     ),
                   )
-                : // Continue
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: double.infinity,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: widget.isLoading
-                          ? accent.withOpacity(0.5)
-                          : accent,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: TextButton(
-                      onPressed: widget.isLoading
-                          ? null
-                          : () => widget.onSubmit(
-                              SwimmerLevel(seconds: _seconds),
-                            ),
-                      child: widget.isLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.black.withOpacity(0.6),
-                              ),
-                            )
-                          : const Text(
-                              'Continue',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                    ),
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward, color: Colors.black, size: 18),
+                    ],
                   ),
           ),
         ),
@@ -268,17 +314,14 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
 
 class _TimeUnit extends StatelessWidget {
   final TextEditingController controller;
-  final String label;
+  final FocusNode focusNode;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final int? maxValue;
 
-  final FocusNode focusNode;
-
   const _TimeUnit({
     required this.controller,
     required this.focusNode,
-    required this.label,
     required this.onIncrement,
     required this.onDecrement,
     this.maxValue,
@@ -290,7 +333,7 @@ class _TimeUnit extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 36),
+          icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 32),
           color: Colors.white54,
           onPressed: () {
             focusNode.unfocus();
@@ -298,11 +341,9 @@ class _TimeUnit extends StatelessWidget {
           },
         ),
         TapRegion(
-          onTapOutside: (tap) {
-            focusNode.unfocus();
-          },
+          onTapOutside: (_) => focusNode.unfocus(),
           child: SizedBox(
-            width: 100,
+            width: 110,
             child: TextField(
               controller: controller,
               focusNode: focusNode,
@@ -310,7 +351,7 @@ class _TimeUnit extends StatelessWidget {
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
               contextMenuBuilder: (context, _) => const SizedBox.shrink(),
-              onSubmitted: (val) {
+              onSubmitted: (_) {
                 focusNode.unfocus();
                 SystemChannels.textInput.invokeMethod('TextInput.hide');
               },
@@ -319,9 +360,10 @@ class _TimeUnit extends StatelessWidget {
                 if (maxValue != null) _MaxValueFormatter(maxValue!),
               ],
               style: const TextStyle(
-                fontSize: 64,
-                fontWeight: FontWeight.w300,
+                fontSize: 80,
+                fontWeight: FontWeight.w700,
                 color: Colors.white,
+                height: 1,
               ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -331,19 +373,19 @@ class _TimeUnit extends StatelessWidget {
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 36),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
           color: Colors.white54,
           onPressed: () {
             focusNode.unfocus();
             onDecrement();
           },
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white38,
-            letterSpacing: 2,
+        const Text(
+          'TAP TO EDIT',
+          style: TextStyle(
+            fontSize: 9,
+            color: Colors.white24,
+            letterSpacing: 1.5,
           ),
         ),
       ],
@@ -363,53 +405,5 @@ class _MaxValueFormatter extends TextInputFormatter {
     final val = int.tryParse(newValue.text);
     if (val != null && val > max) return oldValue;
     return newValue;
-  }
-}
-
-
-class SwimmerLevelBadge extends StatelessWidget {
-  final SwimmerType? level;
-
-  const SwimmerLevelBadge({super.key, required this.level});
-
-  String get _label => switch (level) {
-        SwimmerType.elite => 'Elite',
-        SwimmerType.advanced => 'Advanced',
-        SwimmerType.intermediate => 'Intermediate',
-        SwimmerType.beginner => 'Beginner',
-        null => '—',
-      };
-
-  Color get _color => switch (level) {
-        SwimmerType.elite => const Color(0xFFFFD700),
-        SwimmerType.advanced => const Color(0xFF00C8FF),
-        SwimmerType.intermediate => const Color(0xFF00E096),
-        SwimmerType.beginner => const Color(0xFFAAAAAA),
-        null => const Color(0xFF444444),
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: Container(
-        key: ValueKey(_label),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: _color.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: _color, width: 1.5),
-        ),
-        child: Text(
-          _label,
-          style: TextStyle(
-            color: _color,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
-    );
   }
 }
