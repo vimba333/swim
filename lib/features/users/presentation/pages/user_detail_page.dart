@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:swim/core/presentation/widgets/life_ring.dart';
+import 'package:swim/core/presentation/widgets/wave_divider.dart';
 import 'package:swim/features/users/data/datasources/users_remote_datasource.dart';
 import 'package:swim/features/users/data/repositories/users_repository_impl.dart';
 import 'package:swim/features/users/domain/entities/user.dart';
@@ -18,9 +22,7 @@ class UserDetailPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => UserDetailCubit(
         GetUserUsecase(
-          UsersRepositoryImpl(
-            UsersRemoteDatasourceImpl(http.Client()),
-          ),
+          UsersRepositoryImpl(UsersRemoteDatasourceImpl(http.Client())),
         ),
       )..getUser(userId),
       child: Scaffold(
@@ -39,24 +41,27 @@ class UserDetailPage extends StatelessWidget {
             return switch (state) {
               UserDetailInitial() => const SizedBox.shrink(),
               UserDetailLoading() => const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF00E096)),
-                ),
+                child: CircularProgressIndicator(color: Color(0xFF00E096)),
+              ),
               UserDetailLoaded(:final user) => _UserDetailView(user: user),
               UserDetailError(:final message) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          color: Colors.white38, size: 48),
-                      const SizedBox(height: 12),
-                      Text(
-                        message,
-                        style: const TextStyle(color: Colors.white38),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.white38,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      message,
+                      style: const TextStyle(color: Colors.white38),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
+              ),
             };
           },
         ),
@@ -81,19 +86,7 @@ class _UserDetailView extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor:
-                      const Color(0xFF4DA6FF).withOpacity(0.15),
-                  child: Text(
-                    user.name[0],
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF4DA6FF),
-                    ),
-                  ),
-                ),
+                LifeRing(letter: user.name[0]),
                 const SizedBox(height: 12),
                 Text(
                   user.name,
@@ -106,34 +99,68 @@ class _UserDetailView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '@${user.username}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.white38,
-                  ),
+                  style: const TextStyle(fontSize: 13, color: Colors.white38),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 32),
-
-          _Section(title: 'MAIN', items: [
-            _Item(icon: Icons.email_outlined, label: 'Email', value: user.email),
-            _Item(icon: Icons.phone_outlined, label: 'Phone', value: user.phone),
-            _Item(icon: Icons.language_outlined, label: 'Website', value: user.website),
-          ]),
+          WaveDivider(
+            squareSize: 3,
+            gap: 1,
+            color: const Color(0xFF1565C0),
+            alternateColor: Colors.white,
+            borderRadius: 2,
+            animated: true,
+            animationDuration: const Duration(milliseconds: 5000),
+          ),
+          _Section(
+            title: 'MAIN',
+            items: [
+              _Item(icon: Icons.sailing, label: 'Email', value: user.email),
+              _Item(icon: Icons.waves, label: 'Phone', value: user.phone),
+              _Item(icon: Icons.explore, label: 'Website', value: user.website),
+            ],
+          ),
           const SizedBox(height: 16),
 
-          _Section(title: 'ADDRESS', items: [
-            _Item(icon: Icons.location_city_outlined, label: 'City', value: user.address.city),
-            _Item(icon: Icons.map_outlined, label: 'Street', value: '${user.address.street}, ${user.address.suite}'),
-            _Item(icon: Icons.markunread_mailbox_outlined, label: 'Zip Code', value: user.address.zipcode),
-          ]),
+          _Section(
+            title: 'ADDRESS',
+            items: [
+              _Item(
+                icon: Icons.anchor,
+                label: 'City',
+                value: user.address.city,
+              ),
+              _Item(
+                icon: Icons.map_outlined,
+                label: 'Street',
+                value: '${user.address.street}, ${user.address.suite}',
+              ),
+              _Item(
+                icon: Icons.markunread_mailbox_outlined,
+                label: 'Zip Code',
+                value: user.address.zipcode,
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
 
-          _Section(title: 'COMPANY', items: [
-            _Item(icon: Icons.business_outlined, label: 'Name', value: user.company.name),
-            _Item(icon: Icons.format_quote_outlined, label: 'Catch Phrase', value: user.company.catchPhrase),
-          ]),
+          _Section(
+            title: 'COMPANY',
+            items: [
+              _Item(
+                icon: Icons.directions_boat_outlined,
+                label: 'Name',
+                value: user.company.name,
+              ),
+              _Item(
+                icon: Icons.format_quote_outlined,
+                label: 'Catch Phrase',
+                value: user.company.catchPhrase,
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -207,10 +234,7 @@ class _Item extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.white38,
-                ),
+                style: const TextStyle(fontSize: 11, color: Colors.white38),
               ),
               const SizedBox(height: 2),
               Text(
@@ -228,3 +252,6 @@ class _Item extends StatelessWidget {
     );
   }
 }
+
+
+

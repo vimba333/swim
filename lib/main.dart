@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: AppColors.background,
           colorScheme: const ColorScheme.dark().copyWith(
             surface: AppColors.background,
+            primary: const Color(0xFF00E096), 
           ),
         ),
         routerConfig: appRouter,

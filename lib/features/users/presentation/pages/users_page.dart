@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:swim/core/presentation/widgets/pool_lane_divider.dart';
+import 'package:swim/core/presentation/widgets/wave_divider.dart';
+
 import 'package:swim/features/users/data/datasources/users_remote_datasource.dart';
 import 'package:swim/features/users/data/repositories/users_repository_impl.dart';
 import 'package:swim/features/users/domain/use_cases/get_users_usecase.dart';
@@ -54,10 +57,7 @@ class _UsersViewState extends State<_UsersView> {
         ),
         title: const Text(
           'Users',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -102,62 +102,75 @@ class _UsersViewState extends State<_UsersView> {
               },
             ),
           ),
+          Opacity(
+            opacity: 0.7,
+            child: WaveDivider(
+              squareSize: 3,
+              gap: 1,
+              color: const Color(0xFF1565C0),
+              alternateColor: Colors.white,
+              borderRadius: 2,
+              animated: true,
+              animationDuration: const Duration(milliseconds: 5000),
+            ),
+          ),
           Expanded(
             child: BlocBuilder<UsersCubit, UsersState>(
               builder: (context, state) {
                 return switch (state) {
                   UsersInitial() => const SizedBox.shrink(),
                   UsersLoading() => const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF00E096),
-                      ),
-                    ),
-                  UsersLoaded(:final filtered) => filtered.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nothing found',
-                            style: TextStyle(color: Colors.white38),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          itemCount: filtered.length,
-                          itemBuilder: (context, index) => _UserCardWrapper(
-                            onTap: () =>
-                                context.push('/users/${filtered[index].id}'),
-                            child: UserCard(user: filtered[index]),
-                          ),
-                        ),
-                  UsersError(:final message) => Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: Colors.white38,
-                            size: 48,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            message,
-                            style: const TextStyle(color: Colors.white38),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () =>
-                                context.read<UsersCubit>().getUsers(),
-                            child: const Text(
-                              'Try again',
-                              style: TextStyle(color: Color(0xFF00E096)),
+                    child: CircularProgressIndicator(color: Color(0xFF00E096)),
+                  ),
+                  UsersLoaded(:final filtered) =>
+                    filtered.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'Nothing found',
+                              style: TextStyle(color: Colors.white38),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            itemCount: filtered.length,
+                            separatorBuilder: (context, index) =>
+                                Opacity(opacity: 0.3, child: PoolLaneDivider()),
+                            itemBuilder: (context, index) => _UserCardWrapper(
+                              onTap: () =>
+                                  context.push('/users/${filtered[index].id}'),
+                              child: UserCard(user: filtered[index]),
                             ),
                           ),
-                        ],
-                      ),
+                  UsersError(:final message) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.white38,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          message,
+                          style: const TextStyle(color: Colors.white38),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () =>
+                              context.read<UsersCubit>().getUsers(),
+                          child: const Text(
+                            'Try again',
+                            style: TextStyle(color: Color(0xFF00E096)),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
                 };
               },
             ),
