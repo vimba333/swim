@@ -19,7 +19,7 @@ class SurveyRemoteDatasourceImpl implements SurveyRemoteDatasource {
     try {
       final response = await client
           .post(
-            Uri.parse('https://jsonplaceholder.typicode.com/postшs'),
+            Uri.parse('https://jsonplaceholder.typicode.com/posts'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'pace_seconds': paceSeconds}),
           )
