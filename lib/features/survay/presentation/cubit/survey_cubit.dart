@@ -9,13 +9,6 @@ class SurveyCubit extends Cubit<SurveyState> {
 
   SurveyCubit(this._submitPaceUsecase) : super(const SurveyInitial());
 
-  double get _currentSeconds => switch (state) {
-    SurveyInitial(:final seconds) => seconds,
-    SurveyLoading(:final seconds) => seconds,
-    SurveyError(:final seconds) => seconds,
-    _ => 90,
-  };
-
   void updateSeconds(double seconds) {
     emit(SurveyInitial(seconds: seconds));
   }

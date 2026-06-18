@@ -35,7 +35,16 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
     SwimmerType.beginner,
   ];
 
-  static const _sliderTicks = ['1:10', '1:30', '2:00'];
+  static const _sliderTicks = [
+    '0:45',
+    '1:00',
+    '1:30',
+    '2:00',
+    '2:30',
+    '3:00',
+    '3:30',
+    '4:00',
+  ];
 
   @override
   void initState() {
@@ -97,19 +106,19 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
   }
 
   Color _accentColor(SwimmerType? level) => switch (level) {
-        SwimmerType.elite => const Color(0xFFFFD700),
-        SwimmerType.advanced => const Color(0xFF4DA6FF),
-        SwimmerType.intermediate => const Color(0xFF00E096),
-        SwimmerType.beginner => const Color(0xFFAAAAAA),
-        null => const Color(0xFF4DA6FF),
-      };
+    SwimmerType.elite => const Color(0xFFFFD700),
+    SwimmerType.advanced => const Color(0xFF4DA6FF),
+    SwimmerType.intermediate => const Color(0xFF00E096),
+    SwimmerType.beginner => const Color(0xFFAAAAAA),
+    null => const Color(0xFF4DA6FF),
+  };
 
   String _levelLabel(SwimmerType type) => switch (type) {
-        SwimmerType.elite => 'Elite',
-        SwimmerType.advanced => 'Advanced',
-        SwimmerType.intermediate => 'Intermediate',
-        SwimmerType.beginner => 'Beginner',
-      };
+    SwimmerType.elite => 'Elite',
+    SwimmerType.advanced => 'Advanced',
+    SwimmerType.intermediate => 'Intermediate',
+    SwimmerType.beginner => 'Beginner',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +132,12 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
         const Text(
           'YOUR PACE',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             color: Colors.white38,
             letterSpacing: 2,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 6),
 
         // MIN : SEC
         Row(
@@ -141,23 +150,15 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
               onIncrement: () => _updateSeconds(_seconds + 60),
               onDecrement: () => _updateSeconds(_seconds - 60),
             ),
-            // Двоеточие с квадратиками
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    color: accent,
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    color: accent,
-                  ),
+                  Container(width: 15, height: 15, color: Color(0xFF00E096)),
+                  const SizedBox(height: 30),
+                  Container(width: 15, height: 15, color: Color(0xFF00E096)),
                 ],
               ),
             ),
@@ -181,9 +182,7 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
             letterSpacing: 2,
           ),
         ),
-        const SizedBox(height: 32),
-
-        // THAT PUTS YOU AT
+        const SizedBox(height: 22),
         const Text(
           'THAT PUTS YOU AT',
           style: TextStyle(
@@ -199,33 +198,32 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
             key: ValueKey(level),
             level != null ? _levelLabel(level) : '—',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: accent,
             ),
           ),
         ),
-        const SizedBox(height: 24),
-
-        // Уровни над слайдером
+        const SizedBox(height: 15),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _levels.map((l) {
             final isActive = l == level;
-            return Text(
-              _levelLabel(l),
-              style: TextStyle(
-                fontSize: 11,
-                color: isActive ? Colors.white : Colors.white38,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w400,
+            return Transform.translate(
+              offset: Offset(0, isActive ? -2 : 0),
+              child: Text(
+                _levelLabel(l),
+                style: TextStyle(
+                  fontSize: isActive ? 12 : 11,
+                  color: isActive ? Colors.white : Colors.white38,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                ),
               ),
             );
           }).toList(),
         ),
         const SizedBox(height: 4),
 
-        // Слайдер
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: accent,
@@ -250,23 +248,21 @@ class _SwimmerLevelEditorState extends State<SwimmerLevelEditor> {
           ),
         ),
 
-        // Метки слайдера
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: _sliderTicks
-                .map((t) => Text(
-                      t,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.white38,
-                      ),
-                    ))
+                .map(
+                  (t) => Text(
+                    t,
+                    style: const TextStyle(fontSize: 11, color: Colors.white38),
+                  ),
+                )
                 .toList(),
           ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 25),
 
         // Continue
         AnimatedContainer(
@@ -343,7 +339,7 @@ class _TimeUnit extends StatelessWidget {
         TapRegion(
           onTapOutside: (_) => focusNode.unfocus(),
           child: SizedBox(
-            width: 110,
+            width: 150,
             child: TextField(
               controller: controller,
               focusNode: focusNode,
@@ -360,7 +356,8 @@ class _TimeUnit extends StatelessWidget {
                 if (maxValue != null) _MaxValueFormatter(maxValue!),
               ],
               style: const TextStyle(
-                fontSize: 80,
+                fontSize: 90,
+                fontFeatures: [FontFeature.slashedZero()],
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 height: 1,

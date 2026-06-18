@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:swim/core/presentation/widgets/app_snackbar.dart';
 import 'package:swim/features/survay/data/datasources/survey_remote_datasource.dart';
 import 'package:swim/features/survay/data/repositories/survey_repository_impl.dart';
 import 'package:swim/features/survay/domain/entities/swimmer_level.dart';
@@ -9,7 +10,6 @@ import 'package:swim/features/survay/domain/use_cases/submit_pace_usecase.dart';
 import 'package:swim/features/survay/presentation/cubit/survey_cubit.dart';
 import 'package:swim/features/survay/presentation/cubit/survey_state.dart';
 import 'package:swim/features/survay/presentation/widgets/swimmer_level_editor.dart';
-
 
 class SurveyPage extends StatelessWidget {
   const SurveyPage({super.key});
@@ -19,9 +19,7 @@ class SurveyPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => SurveyCubit(
         SubmitPaceUsecase(
-          SurveyRepositoryImpl(
-            SurveyRemoteDatasourceImpl(http.Client()),
-          ),
+          SurveyRepositoryImpl(SurveyRemoteDatasourceImpl(http.Client())),
         ),
       ),
       child: const _SurveyView(),
@@ -37,14 +35,9 @@ class _SurveyView extends StatelessWidget {
     return BlocListener<SurveyCubit, SurveyState>(
       listener: (context, state) {
         if (state is SurveySuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Готово!')),
-          );
-        }
-        if (state is SurveyError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          context.go('/');
+        } else if (state is SurveyError) {
+          AppSnackBar.showError(context, state.message);
         }
       },
       child: BlocBuilder<SurveyCubit, SurveyState>(
@@ -73,30 +66,30 @@ class _SurveyView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    // Прогресс бар
-                    _ProgressBar(current: 3, total: 5),
-                    const SizedBox(height: 32),
+
+                    _ProgressBar(current: 5, total: 6),
+                    const SizedBox(height: 22),
                     // Заголовок
                     const Text(
                       "What's your fastest\n100m freestyle?",
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     const Text(
                       'This helps us build a more accurate plan\nfor you.',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Colors.white54,
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 40),
-                    // Редактор
+                    const SizedBox(height: 22),
+
                     SwimmerLevelEditor(
                       initial: SwimmerLevel(seconds: seconds),
                       onSubmit: (level) =>
@@ -110,14 +103,19 @@ class _SurveyView extends StatelessWidget {
                         onPressed: () => context.go('/'),
                         child: const Text(
                           "I don't know my pace, skip this",
+
                           style: TextStyle(
                             color: Colors.white38,
                             fontSize: 13,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.white38,
+                            decorationThickness: 1.0,
+                            decorationStyle: TextDecorationStyle.solid,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 4),
                   ],
                 ),
               ),
