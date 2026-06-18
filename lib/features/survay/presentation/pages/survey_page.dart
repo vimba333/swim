@@ -8,7 +8,7 @@ import 'package:swim/features/survay/domain/entities/swimmer_level.dart';
 import 'package:swim/features/survay/domain/use_cases/submit_pace_usecase.dart';
 import 'package:swim/features/survay/presentation/cubit/survey_cubit.dart';
 import 'package:swim/features/survay/presentation/cubit/survey_state.dart';
-import 'package:swim/features/survay/presentation/widgets/pace_editor.dart';
+import 'package:swim/features/survay/presentation/widgets/swimmer_level_editor.dart';
 
 class SurveyPage extends StatelessWidget {
   const SurveyPage({super.key});
@@ -46,8 +46,6 @@ class _SurveyView extends StatelessWidget {
       },
       child: BlocBuilder<SurveyCubit, SurveyState>(
         builder: (context, state) {
-          
-
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
@@ -56,12 +54,16 @@ class _SurveyView extends StatelessWidget {
                 tooltip: 'Back to the home page',
               ),
             ),
-            body: Padding(
-              padding: const EdgeInsets.all(24),
-              child: PaceEditor(
-                initial: SwimmerLevel(seconds: 240),
-                onSubmit: (level) => context.read<SurveyCubit>().submit(level),
-                isLoading: state is SurveyLoading,
+            body: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: SwimmerLevelEditor(
+                  initial: SwimmerLevel(seconds: 240),
+                  onSubmit: (level) =>
+                      context.read<SurveyCubit>().submit(level),
+                  isLoading: state is SurveyLoading,
+                ),
               ),
             ),
           );
